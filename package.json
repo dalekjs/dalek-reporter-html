@@ -1,0 +1,10 @@
+{
+  "author": "Sebastian Golasch",
+  "name": "xxx",
+  "version": "0.0.0",
+  "dependencies": {
+    "handlebars": "1.0.x",
+    "stylus": "0.32.x"
+   },
+  "devDependencies": {}
+}

@@ -1,2 +1,2 @@
-dalek-reporter-html
-===================
+dalek-reporter-console
+======================

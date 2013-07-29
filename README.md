@@ -12,7 +12,7 @@ dalek-reporter-html
 [![unstable](https://rawgithub.com/hughsk/stability-badges/master/dist/unstable.svg)](http://github.com/hughsk/stability-badges)
 
 [![NPM](https://nodei.co/npm/dalek-reporter-html.png)](https://nodei.co/npm/dalek-reporter-html/)
-[![NPM](https://nodei.co/npm-dl/dalek-internal-actions.png)](https://nodei.co/npm/dalek-internal-actions/)
+[![NPM](https://nodei.co/npm-dl/dalek-reporter-html.png)](https://nodei.co/npm/dalek-reporter-html/)
 
 ## Ressources
 

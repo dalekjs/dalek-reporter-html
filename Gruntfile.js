@@ -1,185 +1,250 @@
-module.exports = function( grunt ) {
+/* jshint camelcase: false */
+module.exports = function (grunt) {
   'use strict';
-  //
-  // Grunt configuration:
-  //
-  // https://github.com/cowboy/grunt/blob/master/docs/getting_started.md
-  //
+
   grunt.initConfig({
 
-    // Project configuration
-    // ---------------------
+    // load module meta data
+    pkg: grunt.file.readJSON('package.json'),
 
-    // specify an alternate install location for Bower
-    bower: {
-      dir: 'app/scripts/vendor'
+    // define a src set of files for other tasks
+    src: {
+      lint: ['Gruntfile.js', 'index.js', 'test/*.js'],
+      complexity: ['index.js'],
+      test: ['test/*.js'],
+      src: ['index.js']
     },
 
-    // Coffee to JS compilation
-    coffee: {
-      dist: {
-        src: 'app/scripts/**/*.coffee',
-        dest: 'app/scripts'
+    // clean automatically generated helper files & docs
+    clean: {
+      coverage: ['coverage', 'report/coverage'],
+      report: ['report/complexity', 'report/api', 'report/docs'],
+      reportZip: ['report.zip']
+    },
+
+    // linting
+    jshint: {
+      options: {
+        jshintrc: '.jshintrc'
+      },
+      all: '<%= src.lint %>'
+    },
+
+    // testing
+    mochaTest: {
+      test: {
+        options: {
+          reporter: 'spec',
+          require: 'coverage/blanket'
+        },
+        src: '<%= src.test %>'
+      },
+      coverage: {
+        options: {
+          reporter: 'html-cov',
+          quiet: true,
+          captureFile: 'report/coverage/index.html'
+        },
+        src: '<%= src.test %>'
+      },
+      jsoncoverage: {
+        options: {
+          reporter: 'json-cov',
+          quiet: true,
+          captureFile: 'report/coverage/coverage.json'
+        },
+        src: '<%= src.test %>'
       }
     },
 
-    // compile .scss/.sass to .css using Compass
-    compass: {
-      dist: {
-        // http://compass-style.org/help/tutorials/configuration-reference/#configuration-properties
+    // code metrics
+    complexity: {
+      generic: {
+        src: '<%= src.complexity %>',
         options: {
-          css_dir: 'temp/styles',
-          sass_dir: 'app/styles',
-          images_dir: 'app/images',
-          javascripts_dir: 'temp/scripts',
-          force: true
+          cyclomatic: 10,
+          halstead: 22,
+          maintainability: 80
+        }
+      }
+    },
+    plato: {
+      generic: {
+        options : {
+          jshint : grunt.file.readJSON('.jshintrc')
+        },
+        files: {
+          'report/complexity': '<%= src.complexity %>',
         }
       }
     },
 
-    // generate application cache manifest
-    manifest:{
-      dest: ''
-    },
-
-    // headless testing through PhantomJS
-    mocha: {
-      all: ['test/**/*.html']
-    },
-
-    // default watch configuration
-    watch: {
-      coffee: {
-        files: '<config:coffee.dist.src>',
-        tasks: 'coffee reload'
-      },
-      compass: {
-        files: [
-          'app/styles/**/*.{scss,sass}'
-        ],
-        tasks: 'compass reload'
-      },
-      reload: {
-        files: [
-          'app/*.html',
-          'app/styles/**/*.css',
-          'app/scripts/**/*.js',
-          'app/images/**/*'
-        ],
-        tasks: 'reload'
+    // api docs
+    yuidoc: {
+      compile: {
+        name: '<%= pkg.name %>',
+        description: '<%= pkg.description %>',
+        version: '<%= pkg.version %>',
+        url: '<%= pkg.homepage %>',
+        options: {
+          paths: '.',
+          outdir: 'report/api'
+        }
       }
     },
 
-    // default lint configuration, change this to match your setup:
-    // https://github.com/cowboy/grunt/blob/master/docs/task_lint.md#lint-built-in-task
-    lint: {
-      files: [
-        'Gruntfile.js',
-        'app/scripts/**/*.js',
-        'spec/**/*.js'
-      ]
-    },
-
-    // specifying JSHint options and globals
-    // https://github.com/cowboy/grunt/blob/master/docs/task_lint.md#specifying-jshint-options-and-globals
-    jshint: {
+    // user docs
+    documantix: {
       options: {
-        curly: true,
-        eqeqeq: true,
-        immed: true,
-        latedef: true,
-        newcap: true,
-        noarg: true,
-        sub: true,
-        undef: true,
-        boss: true,
-        eqnull: true,
-        browser: true
+        header: 'dalekjs/dalekjs.com/master/assets/header.html',
+        footer: 'dalekjs/dalekjs.com/master/assets/footer.html',
+        target: 'report/docs',
+        vars: {
+          title: 'DalekJS - Documentation - Reporter - HTML',
+          desc: 'DalekJS - Documentation - Reporter - HTML',
+          docs: true
+        }
       },
-      globals: {
-        jQuery: true
+      src: ['index.js']
+    },
+
+    // add current timestamp to the html document
+    includereplace: {
+      dist: {
+        options: {
+          globals: {
+            timestamp: '<%= grunt.template.today("dddd, mmmm dS, yyyy, h:MM:ss TT") %>'
+          },
+        },
+        src: 'report/docs/*.html',
+        dest: '.'
       }
     },
 
-    // Build configuration
-    // -------------------
+    // compress artifacts
+    compress: {
+      main: {
+        options: {
+          archive: 'report.zip'
+        },
+        files: [
+          {src: ['report/**'], dest: '/'}
+        ]
+      }
+    }
 
-    // the staging directory used during the process
-    staging: 'temp',
-    // final build output
-    output: 'dist',
+  });
 
-    mkdirs: {
-      staging: 'app/'
-    },
+  // prepare files & folders for grunt:plato & coverage
+  grunt.registerTask('preparePlato', function () {
+    var fs = require('fs');
 
-    // Below, all paths are relative to the staging directory, which is a copy
-    // of the app/ directory. Any .gitignore, .ignore and .buildignore file
-    // that might appear in the app/ tree are used to ignore these values
-    // during the copy process.
+    // generate dirs for docs & reports
+    ['report', 'report/complexity', 'report/complexity/files', 'report/complexity/files/index_js'].forEach(function (path) {
+      if (!fs.existsSync(__dirname + '/' + path)) {
+        fs.mkdirSync(__dirname + '/' + path);
+      }
+    });
 
-    // concat css/**/*.css files, inline @import, output a single minified css
-    css: {
-      'styles/main.css': ['styles/**/*.css']
-    },
+    // store some dummy reports, so that grunt plato doesnt complain
+    ['report.history.json', 'files/index_js/report.history.json'].forEach(function (file) {
+      if (!fs.existsSync(__dirname + '/report/complexity/' + file)) {
+        fs.writeFileSync(__dirname + '/report/complexity/' + file, '{}');
+      }
+    });
+  });
 
-    // renames JS/CSS to prepend a hash of their contents for easier
-    // versioning
-    rev: {
-      js: 'scripts/**/*.js',
-      css: 'styles/**/*.css',
-      img: 'images/**'
-    },
+  // prepare files & folders for coverage
+  grunt.registerTask('prepareCoverage', function () {
+    var fs = require('fs');
 
-    // usemin handler should point to the file containing
-    // the usemin blocks to be parsed
-    'usemin-handler': {
-      html: 'index.html'
-    },
+    // generate folders
+    ['coverage', 'report', 'report/coverage'].forEach(function (folder) {
+      if (!fs.existsSync(__dirname + '/' + folder)) {
+        fs.mkdirSync(__dirname + '/' + folder);
+      }
+    });
 
-    // update references in HTML/CSS to revved files
-    usemin: {
-      html: ['**/*.html'],
-      css: ['**/*.css']
-    },
-
-    // HTML minification
-    html: {
-      files: ['**/*.html']
-    },
-
-    // Optimizes JPGs and PNGs (with jpegtran & optipng)
-    img: {
-      dist: '<config:rev.img>'
-    },
-
-    // rjs configuration. You don't necessarily need to specify the typical
-    // `path` configuration, the rjs task will parse these values from your
-    // main module, using http://requirejs.org/docs/optimization.html#mainConfigFile
-    //
-    // name / out / mainConfig file should be used. You can let it blank if
-    // you're using usemin-handler to parse rjs config from markup (default
-    // setup)
-    rjs: {
-      // no minification, is done by the min task
-      optimize: 'none',
-      baseUrl: './scripts',
-      wrap: true,
-      name: 'main'
-    },
-
-    // While Yeoman handles concat/min when using
-    // usemin blocks, you can still use them manually
-    concat: {
-      dist: ''
-    },
-
-    min: {
-      dist: ''
+    // generate code coverage helper file
+    var coverageHelper = 'require("blanket")({pattern: [require("fs").realpathSync(__dirname + "/../index.js")]});';
+    if (!fs.existsSync(__dirname + '/coverage/blanket.js')) {
+      fs.writeFileSync(__dirname + '/coverage/blanket.js', coverageHelper);
     }
   });
 
-  // Alias the `test` task to run the `mocha` task instead
-  grunt.registerTask('test', 'mocha');
 
+  // generates a coverage badge
+  grunt.registerTask('generateCoverageBadge', function () {
+    var fs = require('fs');
+    if (fs.existsSync(__dirname + '/node_modules/coverage-badge')) {
+      if (fs.existsSync(__dirname + '/report/coverage/coverage.json')) {
+        var green = [147,188,59];
+        var yellow = [166,157,0];
+        var red = [189,0,2];
+
+        var getColor = function (coverage) {
+          if (coverage > 90) {
+            return mixColors(yellow, green, (coverage-90)/10);
+          }
+
+          if (coverage > 80) {
+            return mixColors(red, yellow, (coverage-80)/10);
+          }
+
+          return createColor(red);
+        };
+
+        var mixColors = function (from, to, ratio) {
+          var result = [], i;
+          for (i=0; i<3; i++) {
+            result[i] = Math.round(from[i] + (ratio * (to[i]-from[i])));
+          }
+          return createColor(result);
+        };
+
+        var createColor = function (values) {
+          return 'rgba('+values[0]+','+values[1]+','+values[2]+',1)';
+        };
+
+        var Badge = require(__dirname + '/node_modules/coverage-badge/lib/Badge.js');
+        var badgeFn = function(coverage) {
+          coverage = Math.floor(Number(coverage));
+          var badge = new Badge({
+            box_color: getColor(coverage),
+            box_text: coverage+'%',
+            label_text: 'cov',
+            height: 18,
+            width: 49,
+            box_width: 25,
+            rounding: 0,
+            padding: 0,
+            label_font: '7pt DejaVu Sans',
+            box_font: 'bold 7pt DejaVu Sans'
+          });
+          return badge.stream();
+        };
+
+        var coverage = JSON.parse(fs.readFileSync(__dirname + '/report/coverage/coverage.json')).coverage;
+        var file = fs.createWriteStream(__dirname + '/report/coverage/coverage.png');
+        badgeFn(coverage).pipe(file);
+      }
+    }
+  });
+
+  // load 3rd party tasks
+  grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-contrib-clean');
+  grunt.loadNpmTasks('grunt-contrib-yuidoc');
+  grunt.loadNpmTasks('grunt-contrib-compress');
+  grunt.loadNpmTasks('grunt-mocha-test');
+  grunt.loadNpmTasks('grunt-complexity');
+  grunt.loadNpmTasks('grunt-documantix');
+  grunt.loadNpmTasks('grunt-plato');
+  grunt.loadNpmTasks('grunt-include-replace');
+
+  // define runner tasks
+  grunt.registerTask('lint', 'jshint');
+  grunt.registerTask('test', ['clean:coverage', 'prepareCoverage', 'lint', 'mochaTest', 'generateCoverageBadge', 'complexity']);
+  grunt.registerTask('docs', ['clean:reportZip', 'clean:report', 'preparePlato', 'plato', 'documantix', 'includereplace', 'yuidoc', 'compress']);
+  grunt.registerTask('all', ['clean', 'test', 'docs']);
 };

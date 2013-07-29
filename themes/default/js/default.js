@@ -1,6 +1,6 @@
 (function () {
     // add klick hander for every <li> test element to hide/show details
-    var parent = document.getElementById('qunit-tests');
+    var parent = document.getElementById('dalekjs-tests');
     var childNodes = parent.childNodes;
     for (var i = 0; i < childNodes.length; i++) {
         childNodes[i].addEventListener('click', function (event) {
@@ -12,13 +12,15 @@
                 }
             }
 
-            event.preventDefault();
+            if (event.target.tagName.toLowerCase() !== 'a') {
+                event.preventDefault();
+            }
         });
     }
 
     // add change handler for 'hide passed tests checkbox'
     var testVisibilityStatus = false;
-    var checkbox = document.getElementById('qunit-filter-pass');
+    var checkbox = document.getElementById('dalekjs-filter-pass');
     var elements = [];
     for (var k = 0; k < childNodes.length; k++) {
         if (childNodes[k].tagName && childNodes[k].tagName.toLowerCase() === 'li' && childNodes[k].className === 'pass') {

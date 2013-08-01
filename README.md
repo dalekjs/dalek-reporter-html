@@ -25,6 +25,38 @@ dalek-reporter-html
 [Homepage](http://dalekjs.com) -
 [Twitter](http://twitter.com/dalekjs)
 
+## Docs
+
+The HTML reporter can produce a set of HTML files with the results of your testrun.
+
+The reporter can be installed with the following command:
+
+```bash
+$ npm install dalek-reporter-html --save-dev
+```
+
+By default the files will be written to the `report/dalek/` folder,
+you can change this by adding a config option to the your Dalekfile
+
+```javascript
+"html-reporter": {
+  "dest": "your/folder"
+}
+```
+
+If you would like to use the reporter (in addition to the std. console reporter),
+you can start dalek with a special command line argument
+
+```bash
+$ dalek your_test.js -r console,html
+```
+
+or you can add it to your Dalekfile
+
+```javascript
+  "reporter": ["console", "html"]
+```
+
 ## Help Is Just A Click Away
 
 ### #dalekjs on FreeNode.net IRC
@@ -58,7 +90,7 @@ requests that implement the feature).
 other, better channels for seeking assistance, like StackOverflow and the
 Google Groups mailing list.
 
-![DalekJS](https://raw.github.com/dalekjs/dalekjs.com/master/img/logo.jpg)
+![DalekJS](https://raw.github.com/dalekjs/dalekjs.com/master/img/logo.png)
 
 ## Legal FooBar (MIT License)
 

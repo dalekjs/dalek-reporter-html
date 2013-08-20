@@ -9,7 +9,7 @@
         <h1 id="dalekjs-header" style="background: {{#if testResult.status}}green{{else}}red{{/if}}">{{testResult.name}} [{{testResult.browser}}]</h1>
         <table>
         {{#each eventLog}}
-            <tr class="{{#if isAction}}action{{else}}assertion{{/if}}">
+            <tr class="{{#if isAction}}action{{else}}assertion {{#if success}}{{else}}fail{{/if}}{{/if}}">
                 {{#if isAction}}
                 <td>ACTION</td>
                 <td>{{type}}</td>

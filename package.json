@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "handlebars": "~1.0.12",
-    "stylus": "~0.35.1"
+    "stylus": "~0.37.0"
   },
   "devDependencies": {
     "grunt": "~0.4.1",
@@ -23,6 +23,7 @@
     "grunt-plato": "~0.2.1",
     "grunt-documantix": "~0.0.3",
     "grunt-include-replace": "~1.1.0",
+    "grunt-bump": "~0.0.1",
     "blanket": "~1.1.5",
     "chai": "~1.7.2"
   },

@@ -2,6 +2,9 @@
 module.exports = function (grunt) {
   'use strict';
 
+  // check task runtime
+  require('time-grunt')(grunt);
+
   grunt.initConfig({
 
     // load module meta data
@@ -131,7 +134,8 @@ module.exports = function (grunt) {
         createTag: true,
         tagName: '%VERSION%',
         tagMessage: '%VERSION%',
-        push: true
+        push: true,
+        pushTo: 'git@github.com:dalekjs/dalek-reporter-html.git'
       }
     },
 
@@ -347,16 +351,7 @@ module.exports = function (grunt) {
   });
 
   // load 3rd party tasks
-  grunt.loadNpmTasks('grunt-contrib-jshint');
-  grunt.loadNpmTasks('grunt-contrib-clean');
-  grunt.loadNpmTasks('grunt-contrib-yuidoc');
-  grunt.loadNpmTasks('grunt-contrib-compress');
-  grunt.loadNpmTasks('grunt-mocha-test');
-  grunt.loadNpmTasks('grunt-complexity');
-  grunt.loadNpmTasks('grunt-documantix');
-  grunt.loadNpmTasks('grunt-plato');
-  grunt.loadNpmTasks('grunt-bump');
-  grunt.loadNpmTasks('grunt-include-replace');
+  require('load-grunt-tasks')(grunt);
 
   // define runner tasks
   grunt.registerTask('lint', 'jshint');

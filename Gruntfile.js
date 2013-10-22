@@ -86,6 +86,14 @@ module.exports = function (grunt) {
       }
     },
 
+    // prepare files & folders for coverage
+    prepareCoverage: {
+      options: {
+        folders: ['coverage', 'report', 'report/coverage'],
+        pattern: '[require("fs").realpathSync(__dirname + "/../index.js")]'
+      }
+    },
+
     // add current timestamp to the html document
     includereplace: {
       dist: {

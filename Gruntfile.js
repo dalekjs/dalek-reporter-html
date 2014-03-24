@@ -102,7 +102,7 @@ module.exports = function (grunt) {
           },
         },
         src: 'report/docs/*.html',
-        dest: '.'
+        dest: './'
       }
     },
 

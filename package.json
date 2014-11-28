@@ -1,6 +1,6 @@
 {
   "name": "dalek-reporter-html",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "HTML reporter for the Dalekjs testing framework",
   "homepage": "http://dalekjs.com",
   "main": "index.js",
